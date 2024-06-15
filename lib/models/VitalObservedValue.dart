@@ -1,4 +1,4 @@
-// vital_observed_value.dart
+
 class VitalObservedValue {
   final int id;
   final int observedValue;
@@ -11,4 +11,13 @@ class VitalObservedValue {
     required this.vitalsMeasureId,
     required this.readingType,
   });
+
+  factory VitalObservedValue.fromJson(Map<String, dynamic> json) {
+    return VitalObservedValue(
+      id: json['id'],
+      observedValue: json['observedValue'],
+      vitalsMeasureId: json['vitalsMeasureId'],
+      readingType: json['readingType'],
+    );
+  }
 }

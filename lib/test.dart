@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:fyp/screens/PHR/Home.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:fyp/Services/config.dart';
 
 class Vital {
   final int patientId;
@@ -37,11 +39,11 @@ class VitalObservedValue {
 }
 
 Future<String> submitVitalReading(Vital vital) async {
-  final String baseUrl = 'http://192.168.18.1:3000/measures';
+  final url = Uri.parse('${Config.baseUrl}/measures');
   final String token =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6InBhdGllbnQiLCJpYXQiOjE3MDU4OTAwNjcsImV4cCI6MTcwNTg5MzY2N30.wIcaxoT15SQJM-ghRiqinVnAKnRgwRiqEgLvEUvYzDI';
 
-  final response = await http.post(Uri.parse(baseUrl),
+  final response = await http.post(url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $token',
@@ -74,6 +76,17 @@ class _UploadDataScreenState extends State<UploadDataScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Upload Vitals Data'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.home),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen(token: "akjhgkahe")),
+              );
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -216,8 +229,8 @@ class _UploadDataScreenState extends State<UploadDataScreen> {
                 // Example:
                 if (_selectedVital == 'Sugar') {
                   submitVitalReading(Vital(
-                    patientId: 3,
-                    vitalsId: 1, // Assuming 1 is the ID for Sugar
+                    patientId: 1,
+                    vitalsId: 17, // Assuming 1 is the ID for Sugar
                     vitalObservedValues: [
                       VitalObservedValue(
                         readingType: _selectedReadingType,
@@ -228,8 +241,8 @@ class _UploadDataScreenState extends State<UploadDataScreen> {
                   ));
                 } else if (_selectedVital == 'Blood Pressure') {
                   submitVitalReading(Vital(
-                    patientId: 3,
-                    vitalsId: 2, // Assuming 2 is the ID for Blood Pressure
+                    patientId: 1,
+                    vitalsId: 15, // Assuming 2 is the ID for Blood Pressure
                     vitalObservedValues: [
                       VitalObservedValue(
                         readingType: 'Systolic',
@@ -245,8 +258,8 @@ class _UploadDataScreenState extends State<UploadDataScreen> {
                   ));
                 } else if (_selectedVital == 'Temperature') {
                   submitVitalReading(Vital(
-                    patientId: 3,
-                    vitalsId: 3, // Assuming 3 is the ID for Temperature
+                    patientId: 1,
+                    vitalsId: 16, // Assuming 3 is the ID for Temperature
                     vitalObservedValues: [
                       VitalObservedValue(
                         readingType: _selectedUnit,

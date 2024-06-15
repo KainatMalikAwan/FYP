@@ -1,4 +1,3 @@
-// vitals.dart
 class Vitals {
   final int id;
   final String name;
@@ -7,4 +6,15 @@ class Vitals {
     required this.id,
     required this.name,
   });
+
+  factory Vitals.fromJson(Map<String, dynamic> json) {
+    return Vitals(
+      id: json['id'],
+      name: json['name'],
+    );
+  }
 }
+
+
+
+

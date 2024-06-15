@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:fyp/CustomWidgets/CustomBottomNavBar.dart';
 import 'package:fyp/CustomWidgets/CustomAppBarIconButton.dart';
-import 'package:fyp/CustomWidgets/AddVitalsPopUp.dart'; // Import your custom pop-up
+import 'package:fyp/CustomWidgets/AddVitalsPopUp.dart';
+import 'package:fyp/screens/PHR/Vitals.dart';
+import 'package:fyp/screens/PHR/OCR.dart';
+import 'package:fyp/screens/PHR/patientProfile.dart';
+import 'package:fyp/screens/PHR/Reports.dart';
+import 'package:fyp/Services/API/AuthAPI.dart';
+import 'package:fyp/screens/splash.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../temp.dart';
+import '../Login.dart';
+import 'package:fyp/test.dart';
 
 class HomeScreen extends StatefulWidget {
+  final String token; // Pass the token from login
+  HomeScreen({required this.token});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -12,9 +25,23 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _isPlusClicked = false;
 
+  PageController _pageController = PageController();
+  late SharedPreferences _prefs; // Define _prefs here
+
+  @override
+  void initState() {
+    super.initState();
+    _initPreferences(); // Initialize _prefs
+  }
+
+  void _initPreferences() async {
+    _prefs = await SharedPreferences.getInstance(); // Initialize _prefs
+  }
+
   void _onItemSelected(int index) {
     setState(() {
       _selectedIndex = index;
+      _pageController.jumpToPage(index);
     });
   }
 
@@ -44,6 +71,20 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _logout() async {
+    // Check if _prefs is initialized
+    if (_prefs != null) {
+      // Clear all data from shared preferences
+      await _prefs.clear();
+
+      // Navigate to SplashScreen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SplashScreen()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,71 +93,77 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Image.asset(
-              'assets/images/logo2.png', // Adjust the path to your logo
-              width: 32, // Adjust the width of the logo as needed
-              height: 32, // Adjust the height of the logo as needed
+              'assets/images/logo2.png',
+              width: 32,
+              height: 32,
             ),
             SizedBox(width: 8),
-            Text('PHR',
+            Text(
+              'PHR',
               style: TextStyle(
-                  fontSize: 25, // Adjust the font size as needed
-                  fontWeight: FontWeight.bold
-              ),),
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    'Add New Vital  ',
-                    style: TextStyle(
-                      fontSize: 16, // Adjust the font size as needed
-                       fontWeight: FontWeight.bold
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => UploadDataScreen()),
+                      );
+                    },
+                    child: Text(
+                      'Add New Vital',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-
                   CustomAppBarIconButton(
                     isPlusClicked: _isPlusClicked,
                     onTap: _togglePlusClicked,
                     icon: _isPlusClicked ? Icons.close : Icons.add,
                   ),
-                  SizedBox(width: 16.0), // Adjust the width as needed
+                  SizedBox(width: 16.0),
+                  IconButton(
+                    icon: Icon(Icons.logout),
+                    onPressed: _logout,
+                  ),
                 ],
               ),
             ),
           ],
         ),
       ),
-      body: Center(
-       
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        children: [
+          MedicalScreen(),
+          VitalsScreen(),
+          VitalsGraphScreen(),
+          PatientProfileScreen(),
+        ],
       ),
-
       bottomNavigationBar: CustomBottomNavBar(
         icons: [
+          Icons.home,
           Icons.favorite,
           Icons.bar_chart,
-          Icons.share,
           Icons.person,
         ],
         selectedIndex: _selectedIndex,
         onItemSelected: _onItemSelected,
       ),
-    );
-  }
-}
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Your App Title',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: HomeScreen(),
     );
   }
 }
