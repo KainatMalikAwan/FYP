@@ -6,36 +6,8 @@ import 'package:fyp/models/VitalObservedValue.dart';
 import 'package:fyp/Services/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Vital {
-  final int id;
-  final DateTime time;
-  final int patientId;
-  final int vitalsId;
-  final Vitals vitals;
-  final List<VitalObservedValue> vitalObservedValue;
-
-  Vital({
-    required this.id,
-    required this.time,
-    required this.patientId,
-    required this.vitalsId,
-    required this.vitals,
-    required this.vitalObservedValue,
-  });
-
-  factory Vital.fromJson(Map<String, dynamic> json) {
-    return Vital(
-      id: json['id'],
-      time: DateTime.parse(json['time']),
-      patientId: json['patientId'],
-      vitalsId: json['vitalsId'],
-      vitals: Vitals.fromJson(json['vitals']),
-      vitalObservedValue: (json['vitalObservedValue'] as List)
-          .map((item) => VitalObservedValue.fromJson(item))
-          .toList(),
-    );
-  }
-}
+import '../../CustomWidgets/CustomEditVitalPopup.dart';
+import '../../models/Vital.dart';
 
 class VitalsScreen extends StatefulWidget {
   @override
@@ -331,17 +303,37 @@ class _VitalsScreenState extends State<VitalsScreen> {
                   IconButton(
                     icon: Icon(Icons.edit),
                     onPressed: () {
-// Handle edit action
+                      // Handle edit action
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Dialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            elevation: 0.0,
+                            backgroundColor: Colors.transparent,
+                            child: CustomEditVitalsPopUp(
+                              onClose: () {
+                                Navigator.of(context).pop(); // Close the dialog
+                              },
+                              vitaltoedit: vital, // Pass the vital object to edit
+
+                            ),
+                          );
+                        },
+                      );
                     },
                   ),
                   IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () {
-                      _showDeleteConfirmationDialog(vital);
+                      _showDeleteConfirmationDialog(vital); // Call delete confirmation dialog
                     },
                   ),
                 ],
               ),
+
             ),
           ),
         );

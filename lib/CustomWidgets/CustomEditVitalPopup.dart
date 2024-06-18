@@ -1,31 +1,44 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import 'CustomDropdown.dart';
+import '../models/Vital.dart';
+import '../models/VitalObservedValue.dart';
+import '../models/Vitals.dart';
+import '../screens/PHR/Vitals.dart';
 import 'CustomDateTimeTextBox.dart';
 import 'CustomRadioButtons.dart';
 import 'SaveCanelButton.dart';
+import 'package:fyp/Services/API/VitalsService.dart';
+import 'package:fyp/models/VitalObservedValue.dart';
+import 'package:fyp/models/VitalsMeasure.dart';
+import 'package:intl/intl.dart';
+
+final VitalsServices _obj = VitalsServices();
 
 class CustomEditVitalsPopUp extends StatefulWidget {
   final VoidCallback onClose;
+  final Vital vitaltoedit;
 
-  const CustomEditVitalsPopUp({Key? key, required this.onClose}) : super(key: key);
+  const CustomEditVitalsPopUp({Key? key, required this.onClose, required this.vitaltoedit}) : super(key: key);
 
   @override
   _CustomEditVitalsPopUpState createState() => _CustomEditVitalsPopUpState();
 }
 
 class _CustomEditVitalsPopUpState extends State<CustomEditVitalsPopUp> {
-  String _selectedVital = 'Sugar'; // Initially selected value
-  String _selectedType = '';
-  late TextEditingController _controller = TextEditingController();
+  late TextEditingController _controller1;
+  late TextEditingController _controller2;
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
 
   @override
   void initState() {
     super.initState();
-    _selectedVital = 'BP'; // Set the initial selected value
+    _controller1 = TextEditingController(text: widget.vitaltoedit.vitalObservedValue[0].observedValue.toString());
+    _selectedDate = widget.vitaltoedit.time;
+    _selectedTime = TimeOfDay.fromDateTime(widget.vitaltoedit.time);
+
+    if (widget.vitaltoedit.vitals.name == 'Blood Pressure') {
+      _controller2 = TextEditingController(text: widget.vitaltoedit.vitalObservedValue[1].observedValue.toString());
+    }
   }
 
   Future<void> _selectDate() async {
@@ -55,286 +68,285 @@ class _CustomEditVitalsPopUpState extends State<CustomEditVitalsPopUp> {
     }
   }
 
+  void _saveVitalMeasure() {
+    int vitalMeasureId = widget.vitaltoedit.id;
+    DateTime time = _selectedDate!; // The selected date and time
+
+    List<VitalObservedValue> vitalObservedValues = [];
+    if (widget.vitaltoedit.vitals.name == 'Sugar' || widget.vitaltoedit.vitals.name == 'Temp') {
+      vitalObservedValues.add(VitalObservedValue(
+        id: widget.vitaltoedit.vitalObservedValue[0].id,
+        observedValue: int.parse(_controller1.text),
+        vitalsMeasureId: vitalMeasureId,
+        readingType: widget.vitaltoedit.vitalObservedValue[0].readingType,
+      ));
+    } else if (widget.vitaltoedit.vitals.name == 'Blood Pressure') {
+      vitalObservedValues.add(VitalObservedValue(
+        id: widget.vitaltoedit.vitalObservedValue[0].id,
+        observedValue: int.parse(_controller1.text),
+        vitalsMeasureId: vitalMeasureId,
+        readingType: widget.vitaltoedit.vitalObservedValue[0].readingType,
+      ));
+      vitalObservedValues.add(VitalObservedValue(
+        id: widget.vitaltoedit.vitalObservedValue[1].id,
+        observedValue: int.parse(_controller2.text),
+        vitalsMeasureId: vitalMeasureId,
+        readingType: widget.vitaltoedit.vitalObservedValue[1].readingType,
+      ));
+    }
+
+    VitalsMeasure vitalmeasure = VitalsMeasure(
+      vitalsMeasureId: vitalMeasureId,
+      time: time,
+      vitalObservedValues: vitalObservedValues,
+    );
+
+    try {
+      _obj.updateMeasure(vitalmeasure);
+    } catch (e) {
+      print('Error updating VitalsMeasure: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<String> vitals = ['Sugar', 'BP', 'Temperature'];
-
     return Container(
-      height: MediaQuery.of(context).size.height / 2,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 30),
-          Center(
-            child: Text(
-              _selectedVital.isNotEmpty ? _selectedVital : 'Select a Vital Sign',
-              style: TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.symmetric(vertical: 10.0),
-            height: 2.0,
-            width: double.infinity,
-            color: Colors.grey,
-          ),
-          SizedBox(height: 15),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  'Select Item',
-                  style: TextStyle(
-                    fontSize: 19.0,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                SizedBox(width: 30),
-                CustomDropdown(
-                  vitals: vitals,
-                  initialSelectedValue: _selectedVital,
-                  onItemSelected: (value) {
-                    setState(() {
-                      _selectedVital = value;
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 10),
-          // Display different UI components based on the selected vital sign
-          if (_selectedVital == 'Sugar')
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomRadioButtons(
-                  types: ['Fasting', 'Random'],
-                  onOptionSelected: (value) {
-                    setState(() {
-                      _selectedType = value;
-                    });
-                  },
-                ),
-                SizedBox(height: 10),
-                Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(15.0),
-                    border: Border.all(
-                      color: Color(0xFF199A8E),
-                    ),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 12.0),
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText: 'Enter Value',
-                      hintStyle: TextStyle(color: Colors.grey[600]),
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          if (_selectedVital == 'Temperature')
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomRadioButtons(
-                  types: ['Celsius', 'Fahrenheit', 'Kelvin'],
-                  onOptionSelected: (value) {
-                    setState(() {
-                      _selectedType = value;
-                    });
-                  },
-                ),
-                SizedBox(height: 10),
-                Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(15.0),
-                    border: Border.all(
-                      color: Color(0xFF199A8E),
-                    ),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 12.0),
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText: 'Enter Value',
-                      hintStyle: TextStyle(color: Colors.grey[600]),
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          if (_selectedVital == 'BP')
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(15.0),
-                    border: Border.all(
-                      color: Color(0xFF199A8E),
-                    ),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 12.0),
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText: 'Enter Systolic Value',
-                      hintStyle: TextStyle(color: Colors.grey[600]),
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 10),
-                Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(15.0),
-                    border: Border.all(
-                      color: Color(0xFF199A8E),
-                    ),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 12.0),
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText: 'Enter Diastolic Value',
-                      hintStyle: TextStyle(color: Colors.grey[600]),
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        height: MediaQuery.of(context).size.height / 2,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Date:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Row(
-                children: [
-                  Text(
-                    _selectedDate == null
-                        ? 'Select Date'
-                        : '${_selectedDate!.month}/${_selectedDate!.day}/${_selectedDate!.year} ${_selectedTime!.format(context)}', // Display selected time
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.edit),
-                    onPressed: _selectDate,
-                  ),
-                ],
+            SizedBox(height: 30),
+        Center(
+          child: Text(
+            widget.vitaltoedit.vitals.name.isNotEmpty ? widget.vitaltoedit.vitals.name : 'Select a Vital Sign',
+            style: TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(vertical: 10.0),
+          height: 2.0,
+          width: double.infinity,
+          color: Colors.grey,
+        ),
+        SizedBox(height: 15),
+        if (widget.vitaltoedit.vitals.name == "Sugar")
+    Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CustomRadioButtons(
+          types: ['Fasting', 'Regular'],
+          onOptionSelected: (value) {
+            // Handle selection change if needed
+          },
+          initialSelectedValue: widget.vitaltoedit.vitalObservedValue[0].readingType,
+        ),
+
+        SizedBox(height: 10),
+        Container(
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(15.0),
+            border: Border.all(
+              color: Color(0xFF199A8E),
+            ),
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 12.0),
+          child: TextField(
+            controller: _controller1,
+            decoration: InputDecoration(
+              hintText: 'Enter Value',
+              hintStyle: TextStyle(color: Colors.grey[600]),
+              border: InputBorder.none,
+            ),
+          ),
+        ),
+      ],
+    ),
+    if (widget.vitaltoedit.vitals.name == "Temp")
+    Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+    CustomRadioButtons(
+    types: ['Celsius', 'Fahrenheit', 'Kelvin'],
+    onOptionSelected: (value) {
+    // Handle selection change if needed
+    },
+    initialSelectedValue: widget.vitaltoedit.vitalObservedValue[0].readingType,
+    ),
+    SizedBox(height: 10),
+    Container(
+    height: 40,
+    decoration: BoxDecoration(
+    color: Colors.grey[200],
+    borderRadius: BorderRadius.circular(15.0),
+    border: Border.all(
+    color: Color(0xFF199A8E),
+    ),
+    ),
+    padding: EdgeInsets.symmetric(horizontal: 12.0),
+    child: TextField(
+    controller: _controller1,
+    decoration: InputDecoration(
+    hintText: 'Enter Value',
+    hintStyle: TextStyle(color: Colors.grey[600]),
+    border: InputBorder.none,
+    ),
+    ),
+    ),
+    ],
+    ),
+    if (widget.vitaltoedit.vitals.name == "Blood Pressure")
+    Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        'Systolic Value',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      SizedBox(height: 10),
+    Container(
+    height: 40,
+    decoration: BoxDecoration(
+    color: Colors.grey[200],
+    borderRadius: BorderRadius.circular(15.0),
+    border: Border.all(
+    color: Color(0xFF199A8E),
+    ),
+    ),
+    padding: EdgeInsets.symmetric(horizontal: 12.0),
+    child: Row(
+    children: [
+    Expanded(
+    child: TextField(
+    controller: _controller1,
+    decoration: InputDecoration(
+
+    hintText: 'Enter Diastolic Value',
+    hintStyle: TextStyle(color: Colors.grey[600]),
+    border: InputBorder.none,
+    ),
+    ),
+    ),
+    SizedBox(width: 15),
+    Text(
+    'mmHg',
+    style: TextStyle(fontSize: 16),
+    ),
+    ],
+    ),
+    ),
+    SizedBox(height: 15),
+      Text(
+        'Diastolic Value',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      SizedBox(height: 10),
+    Container(
+    height: 40,
+    decoration: BoxDecoration(
+    color: Colors.grey[200],
+    borderRadius: BorderRadius.circular(15.0),
+    border: Border.all(
+    color: Color(0xFF199A8E),
+    ),
+    ),
+    padding: EdgeInsets.symmetric(horizontal: 12.0),
+    child: Row(
+    children: [
+    Expanded(
+
+    child: TextField(
+    controller: _controller2,
+    decoration: InputDecoration(
+
+    hintText: 'Enter Diastolic Value',
+    hintStyle: TextStyle(color: Colors.grey[600]),
+    border: InputBorder.none,
+    ),
+    ),
+    ),
+    SizedBox(width: 10),
+    Text(
+    'mmHg',
+    style: TextStyle(fontSize: 16),
+    ),
+    ],
+    ),
+    ),
+    ],
+    ),
+    SizedBox(height: 20),
+    Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+    Text(
+    'Date:',
+    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    ),
+    Row(
+    children: [
+    Text(
+    _selectedDate != null
+    ? '${_selectedDate!.month}/${_selectedDate!.day}/${_selectedDate!.year} ${DateFormat.jm().format(_selectedDate!)}'
+        : 'No date selected',
+      style: TextStyle(fontSize: 16),
+    ),
+      IconButton(
+        icon: Icon(Icons.edit),
+        onPressed: _selectDate,
+      ),
+    ],
+    ),
+    ],
+    ),
+              SizedBox(height: 10),
+              SaveCancelButtons(
+                onSave: () {
+                  // Handle save button press
+                  print('Save button pressed');
+                  _saveVitalMeasure();
+                  widget.onClose();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => VitalsScreen()), // Navigate to VitalsScreen
+                  );
+                },
+                onCancel: () {
+                  // Handle cancel button press
+                  print('Cancel button pressed');
+                  widget.onClose();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => VitalsScreen()), // Navigate to VitalsScreen
+                  );
+                },
               ),
             ],
-          ),
-          SizedBox(height: 10),
-          SaveCancelButtons(
-            onSave: () {
-              // Handle save button press
-              print('Save button pressed');
-              widget.onClose();
-              Navigator.of(context).pop();
-              // Add logic to upload data based on the selected vital sign and type
-              // Example:
-              if (_selectedVital == 'Sugar') {
-                // Use _selectedType and _controller.text to upload sugar data
-              } else if (_selectedVital == 'Temperature') {
-                // Use _selectedType and _controller.text to upload temperature data
-              } else if (_selectedVital == 'BP') {
-                // Use _controller.text to upload blood pressure data
-              }
-            },
-            onCancel: () {
-              // Handle cancel button press
-              print('Cancel button pressed');
-              widget.onClose();
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      ),
+        ),
     );
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller1.dispose();
+    if (widget.vitaltoedit.vitals.name == 'Blood Pressure') {
+      _controller2.dispose();
+    }
     super.dispose();
-  }
-}
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Custom Edit Vitals Popup',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Custom Edit Vitals Popup Example'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            // Show the custom edit vitals popup
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return Dialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  elevation: 0.0,
-                  backgroundColor: Colors.transparent,
-                  child: CustomEditVitalsPopUp(
-                    onClose: () {
-                      Navigator.of(context).pop(); // Close the dialog
-                    },
-                  ),
-                );
-              },
-            );
-          },
-          child: Text('Open Edit Vitals Popup'),
-        ),
-      ),
-    );
   }
 }
