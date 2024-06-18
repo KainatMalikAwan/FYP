@@ -9,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../CustomWidgets/CustomEditVitalPopup.dart';
 import '../../models/Vital.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class VitalsScreen extends StatefulWidget {
   @override
   _VitalsScreenState createState() => _VitalsScreenState();
@@ -22,18 +24,22 @@ class _VitalsScreenState extends State<VitalsScreen> {
   Map<int, bool> checkboxValues = {};
   bool outerCheckboxValue = false;
 
+  String token='';
+
   @override
   void initState() {
     super.initState();
     fetchData();
+
   }
 
-  Future<void> fetchData() async {
+    Future<void> fetchData() async {
     final String baseURL = Config.baseUrl;
     final prefs = await SharedPreferences.getInstance();
     final int? patientId = prefs.getInt('userId');
+    token = prefs.getString('token')!;
     // Replace with your patient ID
-    final String token = 'YOUR_TOKEN_HERE'; // Replace with your authentication token
+
 
     try {
       final response = await http.get(
@@ -57,10 +63,10 @@ class _VitalsScreenState extends State<VitalsScreen> {
       throw Exception('Failed to fetch Measures of Patient: $e');
     }
   }
-
   List<DateTime> _getDistinctDates(List<Vital> vitals) {
     Set<DateTime> datesSet = vitals.map((vital) => DateTime(vital.time.year, vital.time.month, vital.time.day)).toSet();
-    return datesSet.toList()..sort((a, b) => b.compareTo(a));
+    List<DateTime> sortedDates = datesSet.toList()..sort((a, b) => b.compareTo(a)); // Sort dates in descending order
+    return sortedDates;
   }
 
   List<Vital> _getVitalsByDate(DateTime date, List<Vital> vitals) {
@@ -231,7 +237,8 @@ class _VitalsScreenState extends State<VitalsScreen> {
         physics: NeverScrollableScrollPhysics(),
     itemCount: _getDistinctDates(filteredVitals).length,
     itemBuilder: (context, index) {
-    final date = _getDistinctDates(filteredVitals)[index];
+          final date = _getDistinctDates(filteredVitals).toList()[index];
+
     final vitalsByDate = _getVitalsByDate(date, filteredVitals);
     bool allChecked = vitalsByDate.every((vital) => checkboxValues[vital.id] == true);
     bool someChecked = vitalsByDate.any((vital) => checkboxValues[vital.id] == true);
