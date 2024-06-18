@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 class CustomRadioButtons extends StatefulWidget {
   final List<String> types;
+  final String? initialSelectedValue;
   final Function(String) onOptionSelected;
 
-  CustomRadioButtons({required this.types, required this.onOptionSelected});
+  CustomRadioButtons({required this.types, required this.onOptionSelected,required this.initialSelectedValue});
 
   @override
   _CustomRadioButtonsState createState() => _CustomRadioButtonsState();
@@ -12,7 +13,11 @@ class CustomRadioButtons extends StatefulWidget {
 
 class _CustomRadioButtonsState extends State<CustomRadioButtons> {
   String _selectedType = '';
-
+  @override
+  void initState() {
+    super.initState();
+    _selectedType = widget.initialSelectedValue!;
+  }
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(

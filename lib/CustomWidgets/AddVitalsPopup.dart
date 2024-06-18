@@ -93,7 +93,7 @@ class _CustomAddVitalsPopUpState extends State<CustomAddVitalsPopUp> {
                     setState(() {
                       _selectedType = value;
                     });
-                  },
+                  }, initialSelectedValue: 'Random',
                 ),
                 SizedBox(height: 10),
                 Container(
@@ -122,12 +122,12 @@ class _CustomAddVitalsPopUpState extends State<CustomAddVitalsPopUp> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CustomRadioButtons(
-                  types: ['Celsius', 'Fahrenheit', 'Kelvin'],
+                  types: const ['Celsius', 'Fahrenheit', 'Kelvin'],
                   onOptionSelected: (value) {
                     setState(() {
                       _selectedType = value;
                     });
-                  },
+                  }, initialSelectedValue: 'Celsius',
                 ),
                 SizedBox(height: 10),
                 Container(

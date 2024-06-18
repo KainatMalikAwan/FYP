@@ -1,9 +1,8 @@
-
 class VitalObservedValue {
   final int id;
-  final int observedValue;
+  late final int observedValue;
   final int vitalsMeasureId;
-  final String readingType;
+  late final String readingType;
 
   VitalObservedValue({
     required this.id,
@@ -19,5 +18,14 @@ class VitalObservedValue {
       vitalsMeasureId: json['vitalsMeasureId'],
       readingType: json['readingType'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'observedValue': observedValue,
+      'vitalsMeasureId': vitalsMeasureId,
+      'readingType': readingType,
+    };
   }
 }
