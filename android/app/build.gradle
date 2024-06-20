@@ -21,20 +21,21 @@ def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
-
 android {
     compileSdkVersion 34 // Update the compileSdkVersion to 34
     buildToolsVersion "34.0.0" // Update the build tools version accordingly
 
     defaultConfig {
         applicationId "com.example.fyp"
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 21 // Directly set the minSdkVersion
         targetSdkVersion 34 // Update the targetSdkVersion to 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         // Add the namespace here
         namespace 'com.example.fyp'
     }
+
+
 
     buildTypes {
         release {

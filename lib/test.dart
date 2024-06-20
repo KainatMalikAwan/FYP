@@ -100,7 +100,7 @@ class _UploadDataScreenState extends State<UploadDataScreen> {
                   _selectedVital = newValue!;
                 });
               },
-              items: ['Sugar', 'Blood Pressure', 'Temperature']
+              items: ['Sugar', 'Blood Pressure', 'Temp']
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
@@ -171,7 +171,7 @@ class _UploadDataScreenState extends State<UploadDataScreen> {
                   ),
                 ],
               ),
-            if (_selectedVital == 'Temperature')
+            if (_selectedVital == 'Temp')
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -256,7 +256,7 @@ class _UploadDataScreenState extends State<UploadDataScreen> {
                       ),
                     ],
                   ));
-                } else if (_selectedVital == 'Temperature') {
+                } else if (_selectedVital == 'Temp') {
                   submitVitalReading(Vital(
                     patientId: 1,
                     vitalsId: 16, // Assuming 3 is the ID for Temperature

@@ -4,10 +4,13 @@ import 'package:http/http.dart' as http;
 import 'package:fyp/models/Vitals.dart';
 import 'package:fyp/models/VitalObservedValue.dart';
 import 'package:fyp/Services/config.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../CustomWidgets/CustomEditVitalPopup.dart';
 import '../../models/Vital.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class VitalsScreen extends StatefulWidget {
   @override
@@ -22,18 +25,22 @@ class _VitalsScreenState extends State<VitalsScreen> {
   Map<int, bool> checkboxValues = {};
   bool outerCheckboxValue = false;
 
+  String token='';
+
   @override
   void initState() {
     super.initState();
     fetchData();
+
   }
 
-  Future<void> fetchData() async {
+    Future<void> fetchData() async {
     final String baseURL = Config.baseUrl;
     final prefs = await SharedPreferences.getInstance();
     final int? patientId = prefs.getInt('userId');
+    token = prefs.getString('token')!;
     // Replace with your patient ID
-    final String token = 'YOUR_TOKEN_HERE'; // Replace with your authentication token
+
 
     try {
       final response = await http.get(
@@ -57,15 +64,18 @@ class _VitalsScreenState extends State<VitalsScreen> {
       throw Exception('Failed to fetch Measures of Patient: $e');
     }
   }
-
   List<DateTime> _getDistinctDates(List<Vital> vitals) {
     Set<DateTime> datesSet = vitals.map((vital) => DateTime(vital.time.year, vital.time.month, vital.time.day)).toSet();
-    return datesSet.toList()..sort((a, b) => b.compareTo(a));
+    List<DateTime> sortedDates = datesSet.toList()..sort((a, b) => b.compareTo(a)); // Sort dates in descending order
+    return sortedDates;
   }
 
   List<Vital> _getVitalsByDate(DateTime date, List<Vital> vitals) {
-    return vitals.where((vital) => DateTime(vital.time.year, vital.time.month, vital.time.day) == date).toList();
+    List<Vital> vitalsByDate = vitals.where((vital) => DateTime(vital.time.year, vital.time.month, vital.time.day) == date).toList();
+    vitalsByDate.sort((a, b) => b.time.compareTo(a.time)); // Sort vitals by time in descending order
+    return vitalsByDate;
   }
+
 
   List<Vital> _filterVitals() {
     List<Vital> filteredVitals = vitals;
@@ -107,9 +117,7 @@ class _VitalsScreenState extends State<VitalsScreen> {
     List<Vital> filteredVitals = _filterVitals();
 
     return Scaffold(
-        appBar: AppBar(
-        title: Text('Vitals'),
-    ),
+
     body: SingleChildScrollView(
     child: Padding(
     padding: const EdgeInsets.all(16.0),
@@ -231,7 +239,8 @@ class _VitalsScreenState extends State<VitalsScreen> {
         physics: NeverScrollableScrollPhysics(),
     itemCount: _getDistinctDates(filteredVitals).length,
     itemBuilder: (context, index) {
-    final date = _getDistinctDates(filteredVitals)[index];
+          final date = _getDistinctDates(filteredVitals).toList()[index];
+
     final vitalsByDate = _getVitalsByDate(date, filteredVitals);
     bool allChecked = vitalsByDate.every((vital) => checkboxValues[vital.id] == true);
     bool someChecked = vitalsByDate.any((vital) => checkboxValues[vital.id] == true);
@@ -239,7 +248,11 @@ class _VitalsScreenState extends State<VitalsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListTile(
-          title: Text('${date.month}/${date.day}'),
+          title: Text(
+            DateFormat('d MMMM, yyyy').format(date),
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+
           trailing: Checkbox(
             value: allChecked ? true : (someChecked ? null : false),
             onChanged: (bool? newValue) {
@@ -262,7 +275,6 @@ class _VitalsScreenState extends State<VitalsScreen> {
     },
     );
   }
-
   Widget _buildExpensesList(List<Vital> vitalsByDate) {
     return ListView.builder(
       shrinkWrap: true,
@@ -271,75 +283,96 @@ class _VitalsScreenState extends State<VitalsScreen> {
       itemBuilder: (context, index) {
         final vital = vitalsByDate[index];
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 9.0),
           child: Container(
             decoration: BoxDecoration(
               color: Colors.grey[200],
               borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  offset: Offset(0, 2),
+                  blurRadius: 4.0,
+                ),
+              ],
             ),
-            child: ListTile(
-              leading: Checkbox(
-                value: checkboxValues[vital.id] ?? false,
-                onChanged: (bool? value) {
-                  setState(() {
-                    checkboxValues[vital.id] = value!;
-// Check if all checkboxes for this date are selected
-                    bool allChecked = vitalsByDate.every((v) => checkboxValues[v.id] == true);
-// Update the outer checkbox state
-                    outerCheckboxValue = allChecked;
-                  });
-                },
-              ),
-              title: Text(
-                vital.vitals.name,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                vital.vitalObservedValue.map((value) => '${value.readingType}: ${value.observedValue}').join(", "),
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.edit),
-                    onPressed: () {
-                      // Handle edit action
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return Dialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            elevation: 0.0,
-                            backgroundColor: Colors.transparent,
-                            child: CustomEditVitalsPopUp(
-                              onClose: () {
-                                Navigator.of(context).pop(); // Close the dialog
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, left: 18.0),
+                  child: Text(
+                    DateFormat.jm().format(vital.time),
+                    style: TextStyle(
+                      fontWeight: FontWeight.normal,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Transform.translate(
+                  offset: Offset(0, 9), // Adjust the value to position ListTile over the text
+                  child: ListTile(
+                    contentPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                    leading: Checkbox(
+                      value: checkboxValues[vital.id] ?? false,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          checkboxValues[vital.id] = value!;
+                          bool allChecked = vitalsByDate.every((v) => checkboxValues[v.id] == true);
+                          outerCheckboxValue = allChecked;
+                        });
+                      },
+                    ),
+                    title: Text(
+                      vital.vitals.name,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      vital.vitalObservedValue.map((value) => '${value.readingType}: ${value.observedValue}').join(", "),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  ),
+                                  elevation: 0.0,
+                                  backgroundColor: Colors.transparent,
+                                  child: CustomEditVitalsPopUp(
+                                    onClose: () {
+                                      Navigator.of(context).pop(); // Close the dialog
+                                    },
+                                    vitaltoedit: vital, // Pass the vital object to edit
+                                  ),
+                                );
                               },
-                              vitaltoedit: vital, // Pass the vital object to edit
-
-                            ),
-                          );
-                        },
-                      );
-                    },
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () {
+                            _showDeleteConfirmationDialog(vital); // Call delete confirmation dialog
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () {
-                      _showDeleteConfirmationDialog(vital); // Call delete confirmation dialog
-                    },
-                  ),
-                ],
-              ),
-
+                ),
+              ],
             ),
           ),
         );
       },
     );
   }
+
 
   void _showDeleteConfirmationDialog(Vital vital) {
     showDialog(
