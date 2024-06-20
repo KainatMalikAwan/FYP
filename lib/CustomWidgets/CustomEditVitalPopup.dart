@@ -146,7 +146,7 @@ class _CustomEditVitalsPopUpState extends State<CustomEditVitalsPopUp> {
           onOptionSelected: (value) {
             // Handle selection change if needed
           },
-          initialSelectedValue: widget.vitaltoedit.vitalObservedValue[0].readingType,
+      initialSelectedValue: widget.vitaltoedit.vitalObservedValue[0].readingType,
         ),
 
         SizedBox(height: 10),

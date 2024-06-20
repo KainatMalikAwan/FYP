@@ -151,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           MedicalScreen(),
           VitalsScreen(),
-          VitalsGraphScreen(),
+          //VitalsGraphScreen(),
           PatientProfileScreen(),
         ],
       ),
