@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
 class ThemeProvider with ChangeNotifier {
+
+  Color buttonColor = Colors.blue; // Variable to store button color
+  Color labelColor = Colors.black; // Variable to store label color
+  Color buttonTextColor = Colors.white; // Variable to store button text color
+  Color bgcolor=Colors.pink;
   Color _foregroundColor = Colors.blue;
   Color _backgroundColor = Colors.white;
   Color _textColor = Colors.black;
