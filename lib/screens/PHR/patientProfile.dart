@@ -45,7 +45,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
       _dob = _prefs.getString('dob') ?? '';
 
       _email = _prefs.getString('email') ?? '';
-      _phoneNumber = _prefs.getString('phoneNumber') ?? '';
+      _phoneNumber = _prefs.getString('cnic') ?? '';
     });
   }
 

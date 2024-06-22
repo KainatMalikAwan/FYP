@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:fyp/CustomWidgets/CustomBottomNavBar.dart';
 import 'package:fyp/CustomWidgets/CustomAppBarIconButton.dart';
 import 'package:fyp/CustomWidgets/AddVitalsPopUp.dart';
-import 'package:fyp/screens/PHR/Vitals.dart';
-import 'package:fyp/screens/PHR/OCR.dart';
+import 'package:fyp/screens/PHR/Vitlas/VitalsList.dart';
+import 'package:fyp/screens/PHR/Reports/OCR.dart';
 import 'package:fyp/screens/PHR/patientProfile.dart';
-import 'package:fyp/screens/PHR/Reports.dart';
 import 'package:fyp/Services/API/AuthAPI.dart';
 import 'package:fyp/screens/splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../temp.dart';
+import '../../CustomWidgets/CutomReportGraph.dart';
 import '../../test.dart';
 import '../Login.dart';
-import 'package:fyp/screens/PHR/Graphs.dart';
+import 'package:fyp/CustomWidgets/GraphsForVitals.dart';
+import 'Reports/AllReports.dart';
+import 'Vitlas/VitalGrahps.dart';
 
 class HomeScreen extends StatefulWidget {
   final String token; // Pass the token from login
@@ -149,9 +150,9 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         children: [
-          MedicalScreen(),
+          TestListScreen(),
           VitalsScreen(),
-          //VitalsGraphScreen(),
+          VitalsGraphScreen(),
           PatientProfileScreen(),
         ],
       ),
