@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fyp/screens/PHR/Home.dart';
 import '../models/Vital.dart';
 import '../models/VitalObservedValue.dart';
 import '../models/Vitals.dart';
@@ -323,7 +324,7 @@ class _CustomEditVitalsPopUpState extends State<CustomEditVitalsPopUp> {
                   widget.onClose();
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => VitalsScreen()), // Navigate to VitalsScreen
+                    MaterialPageRoute(builder: (context) => HomeScreen(token:"adfdsf")), // Navigate to VitalsScreen
                   );
                 },
                 onCancel: () {
@@ -332,7 +333,7 @@ class _CustomEditVitalsPopUpState extends State<CustomEditVitalsPopUp> {
                   widget.onClose();
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => VitalsScreen()), // Navigate to VitalsScreen
+                    MaterialPageRoute(builder: (context) => HomeScreen(token:"adfdsf")), // Navigate to VitalsScreen
                   );
                 },
               ),

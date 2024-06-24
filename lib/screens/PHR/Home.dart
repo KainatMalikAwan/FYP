@@ -9,6 +9,7 @@ import 'package:fyp/Services/API/AuthAPI.dart';
 import 'package:fyp/screens/splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../CustomWidgets/CutomReportGraph.dart';
+import '../../ThemeSettings/ThemeSettings.dart';
 import '../../test.dart';
 import '../Login.dart';
 import 'package:fyp/CustomWidgets/GraphsForVitals.dart';
@@ -38,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _initPreferences() async {
     _prefs = await SharedPreferences.getInstance(); // Initialize _prefs
+
   }
 
   void _onItemSelected(int index) {
@@ -47,31 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _togglePlusClicked() {
-    setState(() {
-      _isPlusClicked = !_isPlusClicked;
-    });
-    if (_isPlusClicked) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return Dialog(
-            child: CustomAddVitalsPopUp(
-              onClose: () {
-                setState(() {
-                  _isPlusClicked = false;
-                });
-              },
-            ),
-          );
-        },
-      ).then((_) {
-        setState(() {
-          _isPlusClicked = false;
-        });
-      });
-    }
-  }
+
 
   Future<void> _logout() async {
     // Check if _prefs is initialized
@@ -103,42 +81,18 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               'PHR',
               style: TextStyle(
+                color: ThemeSettings.labelColor,
                 fontSize: 25,
                 fontWeight: FontWeight.bold,
               ),
+
             ),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => UploadDataScreen()),
-                      );
-                    },
-                    child: Text(
-                      'Add New Vital',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  CustomAppBarIconButton(
-                    isPlusClicked: _isPlusClicked,
-                    onTap: _togglePlusClicked,
-                    icon: _isPlusClicked ? Icons.close : Icons.add,
-                  ),
-                  SizedBox(width: 16.0),
-                  IconButton(
-                    icon: Icon(Icons.logout),
-                    onPressed: _logout,
-                  ),
-                ],
-              ),
+            SizedBox(width: 16.0),
+            IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: _logout,
             ),
+
           ],
         ),
       ),

@@ -59,7 +59,7 @@ void main() {
 
 class CustomGraphWidget extends StatefulWidget {
   final List<DateTime> dates;
-  final List<List<int>> measuredValues;
+  final List<List<double>> measuredValues;
   final List<String> valueTypes;
   final List<String> valueUnits;
 
@@ -78,9 +78,9 @@ class _CustomGraphWidgetState extends State<CustomGraphWidget> {
   late List<charts.Series<GraphData, DateTime>> dataSeries;
   late DateTime minDate;
   late DateTime maxDate;
-  late int minValue;
-  late int maxValue;
-  Map<String, int>? selectedValues;
+  late double minValue;
+  late double maxValue;
+  Map<String, double>? selectedValues;
 
   @override
   void initState() {
@@ -101,7 +101,7 @@ class _CustomGraphWidgetState extends State<CustomGraphWidget> {
 
     var sortedData = _sortData(widget.dates, widget.measuredValues);
     List<DateTime> sortedDates = sortedData.map((e) => e.key).toList();
-    List<List<int>> sortedMeasuredValues = sortedData.map((e) => e.value).toList();
+    List<List<double>> sortedMeasuredValues = sortedData.map((e) => e.value).toList();
 
     dataSeries = _createChartData(sortedDates, sortedMeasuredValues, widget.valueTypes);
     minDate = sortedDates.first;
@@ -110,11 +110,11 @@ class _CustomGraphWidgetState extends State<CustomGraphWidget> {
     maxValue = _calculateMaxValue(sortedMeasuredValues);
   }
 
-  List<MapEntry<DateTime, List<int>>> _sortData(List<DateTime> dates, List<List<int>> measuredValues) {
-    List<MapEntry<DateTime, List<int>>> pairedData = [];
+  List<MapEntry<DateTime, List<double>>> _sortData(List<DateTime> dates, List<List<double>> measuredValues) {
+    List<MapEntry<DateTime, List<double>>> pairedData = [];
 
     for (int i = 0; i < dates.length; i++) {
-      List<int> valuesAtI = [];
+      List<double> valuesAtI = [];
       for (int j = 0; j < measuredValues.length; j++) {
         valuesAtI.add(measuredValues[j][i]);
       }
@@ -125,7 +125,7 @@ class _CustomGraphWidgetState extends State<CustomGraphWidget> {
     return pairedData;
   }
 
-  List<charts.Series<GraphData, DateTime>> _createChartData(List<DateTime> dates, List<List<int>> values, List<String> types) {
+  List<charts.Series<GraphData, DateTime>> _createChartData(List<DateTime> dates, List<List<double>> values, List<String> types) {
     List<charts.Series<GraphData, DateTime>> seriesList = [];
     for (int i = 0; i < types.length; i++) {
       List<GraphData> data = [];
@@ -158,20 +158,20 @@ class _CustomGraphWidgetState extends State<CustomGraphWidget> {
     return colors[index % colors.length];
   }
 
-  int _calculateMinValue(List<List<int>> values) {
-    int minVal = values.expand((e) => e).reduce(min);
+  double _calculateMinValue(List<List<double>> values) {
+    double minVal = values.expand((e) => e).reduce(min);
     return minVal;
   }
 
-  int _calculateMaxValue(List<List<int>> values) {
-    int maxVal = values.expand((e) => e).reduce(max);
+  double _calculateMaxValue(List<List<double>> values) {
+    double maxVal = values.expand((e) => e).reduce(max);
     return maxVal;
   }
 
   void _onSelectionChanged(charts.SelectionModel<DateTime> model) {
     if (model.hasDatumSelection) {
       final selectedDatum = model.selectedDatum;
-      Map<String, int> values = {};
+      Map<String, double> values = {};
       for (var datumPair in selectedDatum) {
         values[datumPair.series.displayName!] = datumPair.datum.value;
       }
@@ -232,7 +232,7 @@ class _CustomGraphWidgetState extends State<CustomGraphWidget> {
                       ),
                     ),
                     tickFormatterSpec: charts.BasicNumericTickFormatterSpec(
-                          (value) => '${value?.toInt()} ${widget.valueUnits[0]}',
+                          (value) => '${value?.toDouble()} ${widget.valueUnits[0]}',
                     ),
                   ),
                   behaviors: [
@@ -299,7 +299,7 @@ class _CustomGraphWidgetState extends State<CustomGraphWidget> {
 
 class GraphData {
   final DateTime time;
-  final int value;
+  final double value;
 
   GraphData(this.time, this.value);
 }

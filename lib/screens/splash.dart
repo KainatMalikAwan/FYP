@@ -47,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Color(0xFF199A8E), // Set background color to #199A8E
       body: Center(
         child: Image.asset(
-          'assets/images/logo.png', // Replace with path to your logo image asset
+          'assets/images/go.png', // Replace with path to your logo image asset
           width: 300, // Set desired width of the logo
           height: 300, // Set desired height of the logo
         ),
