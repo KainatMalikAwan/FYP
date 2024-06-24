@@ -7,8 +7,11 @@ import 'package:fyp/Services/config.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../CustomWidgets/AddVitalsPopUp.dart';
+import '../../../CustomWidgets/CustomAppBarIconButton.dart';
 import '../../../CustomWidgets/CustomEditVitalPopup.dart';
 import '../../../models/Vital.dart';
+import 'package:fyp/test.dart';
 
 
 class VitalsScreen extends StatefulWidget {
@@ -23,6 +26,8 @@ class _VitalsScreenState extends State<VitalsScreen> {
   DateTime? toDate;
   Map<int, bool> checkboxValues = {};
   bool outerCheckboxValue = false;
+  bool _isPlusClicked = false;
+
 
   String token='';
 
@@ -110,12 +115,75 @@ class _VitalsScreenState extends State<VitalsScreen> {
       checkboxValues.updateAll((key, _) => outerCheckboxValue);
     });
   }
-
+  void _togglePlusClicked() {
+    setState(() {
+      _isPlusClicked = !_isPlusClicked;
+    });
+    if (_isPlusClicked) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: CustomAddVitalsPopUp(
+              onClose: () {
+                setState(() {
+                  _isPlusClicked = false;
+                });
+              },
+            ),
+          );
+        },
+      ).then((_) {
+        setState(() {
+          _isPlusClicked = false;
+        });
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     List<Vital> filteredVitals = _filterVitals();
 
     return Scaffold(
+
+
+
+      appBar: AppBar(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => UploadDataScreen()),
+                      );
+                    },
+                    child: Text(
+                      'Add New Vital',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  CustomAppBarIconButton(
+                    isPlusClicked: _isPlusClicked,
+                    onTap: _togglePlusClicked,
+                    icon: _isPlusClicked ? Icons.close : Icons.add,
+                  ),
+
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
 
     body: SingleChildScrollView(
     child: Padding(

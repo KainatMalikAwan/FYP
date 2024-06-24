@@ -91,10 +91,13 @@ class _TestListScreenState extends State<TestListScreen> {
             // Handle onTap for the app bar title
             print('AppBar tapped!');
           },
-          child: Text(' Add New Tests >',
+          child: Text(' Add New Tests:',
             style: TextStyle(
                 color: ThemeSettings.labelColor,
-                fontWeight:FontWeight.w900),
+                fontWeight:FontWeight.w500,
+              fontSize: 15.0,
+            ),
+
           ),
         ),
         actions: [
