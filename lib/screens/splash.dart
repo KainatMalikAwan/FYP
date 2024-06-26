@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fyp/screens/EHR/doc_Home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Login.dart'; // Assuming LoginScreen is imported from Login.dart
 import 'package:fyp/screens/PHR/Home.dart';
@@ -29,10 +30,18 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // Navigate to appropriate screen based on SharedPreferences data
     if (token != null && token.isNotEmpty) {
+
+
       // Navigate to HomeScreen if token exists
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
-      );
+       bool? isPatient=await _prefs.getBool('isPatient');
+       if(isPatient?? false){
+         Navigator.of(context).pushReplacement(
+           MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
+         );
+       }else{ Navigator.of(context).pushReplacement(
+         MaterialPageRoute(builder: (context) =>EHRWelcomeScreen()),
+       );}
+
     } else {
       // Navigate to LoginScreen if token does not exist
       Navigator.of(context).pushReplacement(

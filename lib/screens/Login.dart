@@ -174,6 +174,7 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:fyp/screens/EHR/doc_Home.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fyp/Services/API/AuthAPI.dart';
@@ -192,6 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
   String _errorMessage = '';
+  bool isPatient = false;
 
   final AuthAPI authAPI = AuthAPI();
   late SharedPreferences _prefs;
@@ -216,7 +218,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final String password = _passwordController.text;
 
     try {
-      final response = await authAPI.signIn(email, password);
+
+      final response = await authAPI.signIn(email, password,isPatient);
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -224,6 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final user = responseData['data']['user'];
 
         // Save token and user data in shared preferences
+        await _prefs.setBool('isPatient',isPatient);
         await _prefs.setString('token', token);
         await _prefs.setInt('userId', user['id']);
         await _prefs.setString('email', user['email']);
@@ -234,17 +238,35 @@ class _LoginScreenState extends State<LoginScreen> {
         if (user['role'] == 'patient') {
           final patientData = user['patients'][0];
           await _prefs.setString('fullName', patientData['name']);
+          await _prefs.setString('fullName', patientData['name']);
           await _prefs.setString('dob', patientData['dob']);
           await _prefs.setString('gender', patientData['gender']);
           await _prefs.setString('relation', patientData['relation']);
+          await _prefs.setInt('Patient-id', patientData['id']);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
+          );
 
+        }else if (user['role'] == 'doctor') {
+          // Save doctor's data to shared preferences
+          final doctor = user['doctors'][0];
+          await _prefs.setInt('dr_userId', doctor['userId']);
+          await _prefs.setInt('dr_mrId', doctor['mrId']);
+          await _prefs.setString('dr_name', doctor['name']);
+          await _prefs.setString('dr_profilePicture', doctor['profilePicture'] ?? '');
+          await _prefs.setInt('dr_age', doctor['age']);
+          await _prefs.setString('dr_dob', doctor['dob']);
+          await _prefs.setString('dr_gender', doctor['gender']);
+          await _prefs.setString('dr_specialization', doctor['specialization']);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => EHRWelcomeScreen()),
+          );
         }
 
         // Navigate to HomeScreen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
-        );
+
       } else {
         setState(() {
           _errorMessage = 'Login failed. Please check your credentials.';
@@ -305,6 +327,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _passwordController,
               ),
               SizedBox(height: 16.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text('Is Patient'),
+                Checkbox(
+                  value: isPatient,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      isPatient = value ?? false; // Update isPatient based on checkbox state
+                    });
+                  },
+                ),
+              ],
+            ),
               TextButton(
                 onPressed: () {
                   // Add forgot password logic here

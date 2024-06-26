@@ -72,7 +72,7 @@ class ReportsService {
   Future<List<Map<String, dynamic>>> uploadPatientTest(Test test) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final int? patientId = prefs.getInt('userId');
+      final int? patientId = prefs.getInt('Patient-id');
       test.patientId = patientId ?? 0; // Set patientId from SharedPreferences or default value
       print('---patient ID: ${test.patientId}');
       print('---Lab Offer ID: ${test.labOfferId}');

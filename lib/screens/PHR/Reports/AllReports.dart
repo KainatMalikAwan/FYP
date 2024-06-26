@@ -53,7 +53,7 @@ class _TestListScreenState extends State<TestListScreen> {
   Future<List<TestData>> _fetchTestData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final int? storedPatientId = prefs.getInt('userId');
+      final int? storedPatientId = prefs.getInt('Patient-id');
 
       if (storedPatientId != null) {
         // Replace ReportsService() with your actual service instance

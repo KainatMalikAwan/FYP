@@ -543,13 +543,14 @@
 //     );
 //   }
 // }
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fyp/CustomWidgets/CustomTextBox.dart';
 import 'package:fyp/CustomWidgets/CustomButton.dart';
+import 'package:fyp/screens/Login.dart';
 import 'package:fyp/screens/PHR/Home.dart';
 import 'package:fyp/services/API/SignupService.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -831,7 +832,6 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget _buildLabSignupForm() {
     return Container(); // Implement Lab Signup Form
   }
-
   Future<void> _signup() async {
     try {
       if (_selectedOption == 'Patient Signup') {
@@ -846,14 +846,27 @@ class _SignupScreenState extends State<SignupScreen> {
           "mrId": int.tryParse(_mrId.text)
         };
 
-        await _signupService.createPatient(patientData);
+        http.Response response = await _signupService.createPatient(patientData);
+
+        // Show response in SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              response.statusCode == 200 || response.statusCode == 201
+                  ? 'Patient created successfully!'
+                  : 'Failed to create patient. Error: ${response.body}',
+            ),
+          ),
+        );
 
         // Navigate to home screen after successful signup
-        final token = 'SD21rfjuBdOXSlbbOm0ee52UXnz2'; // Hardcoded token
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
-        );
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final token = 'SD21rfjuBdOXSlbbOm0ee52UXnz2'; // Hardcoded token
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) =>LoginScreen()),
+          );
+        }
       } else if (_selectedOption == 'Doctor Signup') {
         Map<String, dynamic> doctorData = {
           "phone": _phoneController.text,
@@ -867,22 +880,38 @@ class _SignupScreenState extends State<SignupScreen> {
           "specialization": _specializationController.text,
         };
 
-        await _signupService.createDoctor(doctorData);
+        http.Response response = await _signupService.createDoctor(doctorData);
 
-
+        // Show response in SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              response.statusCode == 200 || response.statusCode == 201
+                  ? 'Doctor created successfully!'
+                  : 'Failed to create doctor. Error: ${response.body}',
+            ),
+          ),
+        );
 
         // Navigate to home screen after successful signup
-        final token = 'SD21rfjuBdOXSlbbOm0ee52UXnz2'; // Hardcoded token
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
-        );
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final token = 'SD21rfjuBdOXSlbbOm0ee52UXnz2'; // Hardcoded token
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) =>LoginScreen()),
+          );
+        }
       } else if (_selectedOption == 'Lab Signup') {
         // Implement Lab Signup API Call
       }
     } catch (e) {
       // Handle error
       print(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('An error occurred: $e'),
+        ),
+      );
     }
   }
 

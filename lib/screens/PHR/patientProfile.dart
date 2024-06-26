@@ -1,5 +1,11 @@
+
 import 'package:flutter/material.dart';
+import 'package:fyp/screens/PHR/AllProfiles/addProfile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+
+import '../../Services/API/PHR/Profile.dart';
+import 'AllProfiles/allProfiles.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,12 +32,12 @@ class PatientProfileScreen extends StatefulWidget {
 
 class _PatientProfileScreenState extends State<PatientProfileScreen> {
   late SharedPreferences _prefs;
-  late String _fullName;
-  late String _dob;
-
-  late String _email;
-  late String _phoneNumber;
-
+  String _fullName = ''; // Initialize with an empty string
+  String _gender = '';   // Initialize with an empty string
+  String _email = '';    // Initialize with an empty string
+  String _cnic = '';     // Initialize with an empty string
+  int _uid = 0;          // Initialize with a default value (0 or null)
+  int _mainUserId=0;
   @override
   void initState() {
     super.initState();
@@ -42,11 +48,54 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
       _fullName = _prefs.getString('fullName') ?? '';
-      _dob = _prefs.getString('dob') ?? '';
-
+      _gender = _prefs.getString('gender') ?? '';
       _email = _prefs.getString('email') ?? '';
-      _phoneNumber = _prefs.getString('cnic') ?? '';
+      _cnic = _prefs.getString('cnic') ?? '';
+      _uid = _prefs.getInt('userId') ?? 0;
+     _mainUserId= _prefs.getInt('mainId')??0;// Ensure to handle null or default value
     });
+  }
+
+  Future<void> _saveChanges() async {
+
+    String patientId =_mainUserId.toString(); // Replace with actual patient ID
+
+    Map<String, dynamic> patientData = {
+      'name': _fullName,
+      'gender': _gender,
+      'email': _email,
+      'cnic': _cnic,
+    };
+    try {
+      final response = await editPatient(patientId, patientData);
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Changes saved successfully!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save changes. Please try again later.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save changes: $e')),
+      );
+    }
+  }
+
+  void _viewProfiles() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ProfilesScreen( userId:_uid)),
+    );
+  }
+  void _addProfiles() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AddProfileScreen(userId:_uid)),
+    );
   }
 
   @override
@@ -54,6 +103,17 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Patient Profile'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.people),
+            onPressed: _viewProfiles,
+          ),
+          SizedBox(width: 20,),
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: _addProfiles,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -79,14 +139,23 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                 label: 'Full Name',
                 icon: Icons.person,
                 initialValue: _fullName,
+                onChanged: (value) {
+                  setState(() {
+                    _fullName = value;
+                  });
+                },
               ),
               SizedBox(height: 10),
               CustomTextBox(
-                label: 'Date of Birth',
-                icon: Icons.calendar_today,
-                initialValue: _dob,
+                label: 'Gender',
+                icon: Icons.person_outline,
+                initialValue: _gender,
+                onChanged: (value) {
+                  setState(() {
+                    _gender = value;
+                  });
+                },
               ),
-
               SizedBox(height: 20),
               Text(
                 'Contact Information',
@@ -100,18 +169,26 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                 label: 'Email Address',
                 icon: Icons.email,
                 initialValue: _email,
+                onChanged: (value) {
+                  setState(() {
+                    _email = value;
+                  });
+                },
               ),
               SizedBox(height: 10),
               CustomTextBox(
-                label: 'Phone Number',
-                icon: Icons.phone,
-                initialValue: _phoneNumber,
+                label: 'CNIC',
+                icon: Icons.credit_card,
+                initialValue: _cnic,
+                onChanged: (value) {
+                  setState(() {
+                    _cnic = value;
+                  });
+                },
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  // Add logic to save changes
-                },
+                onPressed: _saveChanges,
                 child: Text('Save Changes'),
               ),
             ],
@@ -137,6 +214,8 @@ class CustomTextBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController controller = TextEditingController(text: initialValue);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -157,11 +236,13 @@ class CustomTextBox extends StatelessWidget {
         TextField(
           decoration: InputDecoration(
             border: OutlineInputBorder(),
-            labelText: initialValue,
+            labelText: label, // Use the label as hint text or modify as needed
           ),
+          controller: controller,
           onChanged: onChanged,
         ),
       ],
     );
   }
 }
+

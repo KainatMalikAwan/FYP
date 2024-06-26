@@ -41,7 +41,7 @@ class _VitalsScreenState extends State<VitalsScreen> {
     Future<void> fetchData() async {
     final String baseURL = Config.baseUrl;
     final prefs = await SharedPreferences.getInstance();
-    final int? patientId = prefs.getInt('userId');
+    final int? patientId = prefs.getInt('Patient-id');
     token = prefs.getString('token')!;
     // Replace with your patient ID
 

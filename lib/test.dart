@@ -3,9 +3,10 @@ import 'package:fyp/screens/PHR/Home.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:fyp/Services/config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class VitalToUplode {
-  final int patientId;
+  final int? patientId;
   final int vitalsId;
   final List<VitalObservedValue> vitalObservedValues;
 
@@ -221,7 +222,7 @@ class _UploadDataScreenState extends State<UploadDataScreen> {
               ),
             SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 // Implement API call here
                 // Use _selectedVital, _selectedReadingType, _selectedUnit
                 // and controller values to construct the API request
@@ -229,8 +230,8 @@ class _UploadDataScreenState extends State<UploadDataScreen> {
                 // Example:
                 if (_selectedVital == 'Sugar') {
                   submitVitalReading(VitalToUplode(
-                    patientId: 1,
-                    vitalsId: 17, // Assuming 1 is the ID for Sugar
+                    patientId:  await fetchid() ,
+                    vitalsId: 1, // Assuming 1 is the ID for Sugar
                     vitalObservedValues: [
                       VitalObservedValue(
                         readingType: _selectedReadingType,
@@ -241,8 +242,8 @@ class _UploadDataScreenState extends State<UploadDataScreen> {
                   ));
                 } else if (_selectedVital == 'Blood Pressure') {
                   submitVitalReading(VitalToUplode(
-                    patientId: 1,
-                    vitalsId: 15, // Assuming 2 is the ID for Blood Pressure
+                    patientId:  await fetchid() ,
+                    vitalsId: 2, // Assuming 2 is the ID for Blood Pressure
                     vitalObservedValues: [
                       VitalObservedValue(
                         readingType: 'Systolic',
@@ -258,8 +259,9 @@ class _UploadDataScreenState extends State<UploadDataScreen> {
                   ));
                 } else if (_selectedVital == 'Temp') {
                   submitVitalReading(VitalToUplode(
-                    patientId: 1,
-                    vitalsId: 16, // Assuming 3 is the ID for Temperature
+
+                    patientId: await fetchid() ,
+                    vitalsId: 3, // Assuming 3 is the ID for Temperature
                     vitalObservedValues: [
                       VitalObservedValue(
                         readingType: _selectedUnit,
@@ -283,4 +285,10 @@ void main() {
   runApp(MaterialApp(
     home: UploadDataScreen(),
   ));
+}
+Future<int?> fetchid() async {
+  final prefs = await SharedPreferences.getInstance();
+  final int? patientId = prefs.getInt('Patient-id');
+  return patientId;
+
 }

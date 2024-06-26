@@ -4,7 +4,8 @@ import 'package:fyp/Services/API/PHR/ReportsServices.dart'; // Adjust the path a
 import 'package:fyp/models/PHR/Reports/Lab.dart'; // Adjust the path as per your project structure
 import 'package:fyp/models/PHR/Reports/LabTestOffer.dart'; // Adjust the path as per your project structure
 import 'package:fyp/models/PHR/Reports/Test.dart';
-import 'package:fyp/ThemeSettings/ThemeSettings.dart'; // Import the theme settings
+import 'package:fyp/ThemeSettings/ThemeSettings.dart';
+import 'package:fyp/screens/PHR/Reports/OCR.dart'; // Import the theme settings
 
 void main() {
   runApp(MyApp());
@@ -285,7 +286,10 @@ class _AddReportState extends State<AddReportScreen> {
                   icon: Icon(Icons.camera_alt),
                   color: ThemeSettings.buttonColor, // Use color from theme settings
                   onPressed: () {
-                    // Handle camera icon press
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => OCRScreen()),
+                    );
                   },
                 ),
               ],

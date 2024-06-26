@@ -5,17 +5,26 @@ import '../config.dart';
 
 class AuthAPI {
   final String _signinUrl = '${Config.baseUrl}/auth/signin';
-  final String _signoutUrl = '${Config.baseUrl}/auth/signout';
+  final String _docUrl= '${Config.baseUrlDoc}/auth/signin';
 
-  Future<http.Response> signIn(String email, String password) async {
+  Future<http.Response> signIn(String email, String password,bool f) async {
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer SD21rfjuBdOXSlbbOm0ee52UXnz2',
+
     };
     final body = jsonEncode({'email': email, 'password': password});
+   if(f) {
+     return await http.post(
+         Uri.parse(_signinUrl), headers: headers, body: body);
+   }else {
 
-    return await http.post(Uri.parse(_signinUrl), headers: headers, body: body);
+     return await http.post(
+         Uri.parse(_docUrl), headers: headers, body: body);
+   }
+   }
   }
 
 
-}
+
+
+

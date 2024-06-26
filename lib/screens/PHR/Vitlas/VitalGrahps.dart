@@ -53,7 +53,7 @@ class _VitalsGraphScreenState extends State<VitalsGraphScreen> {
   Future<void> fetchData() async {
     final String baseURL = Config.baseUrl;
     final prefs = await SharedPreferences.getInstance();
-    final int? patientId = prefs.getInt('userId');
+    final int? patientId = prefs.getInt('Patient-id');
     token = prefs.getString('token')!;
 
     try {
